@@ -437,7 +437,7 @@ class ZHADevice:
             return None
         response = None
         if command_type == SERVER:
-            response = await cluster.command(command, *args,
+            response = await cluster.command(command, *args.split(),  #jms
                                              manufacturer=manufacturer,
                                              expect_reply=True)
         else:
