@@ -71,7 +71,10 @@ def active_power_formatter(value):
     """Return the state of the entity."""
     if value is None:
         return None
-    return round(float(value) / 10, 1)
+    elif value<10:
+      return round(float(value), 1)  # jms 03jul2019
+    else:
+      return round(float(value), 0)  # jms 03jul2019
 
 
 def pressure_formatter(value):
