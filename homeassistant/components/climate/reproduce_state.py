@@ -55,7 +55,8 @@ async def _async_reproduce_states(hass: HomeAssistantType,
         await call_service(SERVICE_SET_TEMPERATURE,
                            [ATTR_TEMPERATURE,
                             ATTR_TARGET_TEMP_HIGH,
-                            ATTR_TARGET_TEMP_LOW])
+                            ATTR_TARGET_TEMP_LOW,
+                            ATTR_UNTIL]) #jms
 
     if ATTR_PRESET_MODE in state.attributes:
         await call_service(SERVICE_SET_PRESET_MODE, [ATTR_PRESET_MODE])
