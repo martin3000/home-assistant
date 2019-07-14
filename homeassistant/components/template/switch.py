@@ -1,4 +1,6 @@
 """Support for switches which integrates with other components."""
+# jms: patch 02.jul.2019: friendly_name_template
+
 import logging
 
 import voluptuous as vol
@@ -7,7 +9,7 @@ from homeassistant.core import callback
 from homeassistant.components.switch import (
     ENTITY_ID_FORMAT, SwitchDevice, PLATFORM_SCHEMA)
 from homeassistant.const import (
-    ATTR_FRIENDLY_NAME, CONF_VALUE_TEMPLATE, CONF_ICON_TEMPLATE,
+    ATTR_FRIENDLY_NAME, CONF_VALUE_TEMPLATE, CONF_ICON_TEMPLATE, CONF_FRIENDLY_NAME_TEMPLATE,
     CONF_ENTITY_PICTURE_TEMPLATE, STATE_OFF, STATE_ON, ATTR_ENTITY_ID,
     CONF_SWITCHES, EVENT_HOMEASSISTANT_START)
 from homeassistant.exceptions import TemplateError
@@ -26,6 +28,7 @@ SWITCH_SCHEMA = vol.Schema({
     vol.Required(CONF_VALUE_TEMPLATE): cv.template,
     vol.Optional(CONF_ICON_TEMPLATE): cv.template,
     vol.Optional(CONF_ENTITY_PICTURE_TEMPLATE): cv.template,
+    vol.Optional(CONF_FRIENDLY_NAME_TEMPLATE): cv.template,    
     vol.Required(ON_ACTION): cv.SCRIPT_SCHEMA,
     vol.Required(OFF_ACTION): cv.SCRIPT_SCHEMA,
     vol.Optional(ATTR_FRIENDLY_NAME): cv.string,
@@ -44,6 +47,7 @@ async def async_setup_platform(hass, config, async_add_entities,
 
     for device, device_config in config[CONF_SWITCHES].items():
         friendly_name = device_config.get(ATTR_FRIENDLY_NAME, device)
+        friendly_name_template = device_config.get(CONF_FRIENDLY_NAME_TEMPLATE)
         state_template = device_config[CONF_VALUE_TEMPLATE]
         icon_template = device_config.get(CONF_ICON_TEMPLATE)
         entity_picture_template = device_config.get(
@@ -55,6 +59,9 @@ async def async_setup_platform(hass, config, async_add_entities,
 
         state_template.hass = hass
 
+        if friendly_name_template is not None:
+            friendly_name_template.hass = hass
+
         if icon_template is not None:
             icon_template.hass = hass
 
@@ -63,7 +70,7 @@ async def async_setup_platform(hass, config, async_add_entities,
 
         switches.append(
             SwitchTemplate(
-                hass, device, friendly_name, state_template,
+                hass, device, friendly_name, friendly_name_template, state_template, 
                 icon_template, entity_picture_template, on_action,
                 off_action, entity_ids)
             )
@@ -78,7 +85,7 @@ async def async_setup_platform(hass, config, async_add_entities,
 class SwitchTemplate(SwitchDevice):
     """Representation of a Template switch."""
 
-    def __init__(self, hass, device_id, friendly_name, state_template,
+    def __init__(self, hass, device_id, friendly_name, friendly_name_template, state_template,
                  icon_template, entity_picture_template, on_action,
                  off_action, entity_ids):
         """Initialize the Template switch."""
@@ -86,6 +93,7 @@ class SwitchTemplate(SwitchDevice):
         self.entity_id = async_generate_entity_id(
             ENTITY_ID_FORMAT, device_id, hass=hass)
         self._name = friendly_name
+        self._friendly_name_template = friendly_name_template
         self._template = state_template
         self._on_script = Script(hass, on_action)
         self._off_script = Script(hass, off_action)
@@ -171,6 +179,7 @@ class SwitchTemplate(SwitchDevice):
 
         for property_name, template in (
                 ('_icon', self._icon_template),
+                ('_name', self._friendly_name_template),
                 ('_entity_picture', self._entity_picture_template)):
             if template is None:
                 continue
