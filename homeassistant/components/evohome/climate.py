@@ -187,8 +187,9 @@ class EvoZone(EvoClimateDevice):
     def set_temperature(self, **kwargs) -> None:
         """Set a new target temperature for an hour."""
         until = kwargs.get('until')
-        if until:
-            until = parse_datetime(until)
+        # converting until into a datetime value does not work with the climate component
+        #if until:
+        #    until = parse_datetime(until)
 
         self._set_temperature(kwargs['temperature'], until)
 
