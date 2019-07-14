@@ -36,6 +36,9 @@ set_temperature:
     hvac_mode:
       description: HVAC operation mode to set temperature to.
       example: 'heat'
+    until:
+      description: timestamp
+      example: 2019-09-13T08:15:00Z
 set_humidity:
   description: Set target humidity of climate device.
   fields:
