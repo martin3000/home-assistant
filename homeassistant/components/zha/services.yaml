@@ -28,6 +28,26 @@ reconfigure_device:
       description: IEEE address of the device to reconfigure
       example: "00:0d:6f:00:05:7d:2d:34"
 
+get_zigbee_cluster_attribute:
+  description: >- 
+    Get attribute value for the specified cluster on the specified entity. 
+  fields:
+    ieee:
+      description: IEEE address for the device
+      example: "00:0d:6f:00:05:7d:2d:34"
+    endpoint_id:
+      description: Endpoint id for the cluster
+      example: 1
+    cluster_id:
+      description: ZCL cluster to retrieve attributes for
+      example: 6
+    cluster_type:
+      description: type of the cluster (in or out)
+      example: "out"
+    attribute:
+      description: id of the attribute to get
+      example: 0
+
 set_zigbee_cluster_attribute:
   description: >- 
     Set attribute value for the specified cluster on the specified entity. 
