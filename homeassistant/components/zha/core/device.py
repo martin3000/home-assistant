@@ -400,7 +400,9 @@ class ZHADevice:
         cluster = self.async_get_cluster(endpoint_id, cluster_id, cluster_type)
         if cluster is None:
             return None
-        return '{"todo":"jms"}'
+        #return '{"todo":"jms"}'
+        return cluster.attributes
+
     
     async def write_zigbee_attribute(self, endpoint_id, cluster_id,
                                      attribute, value, cluster_type=IN,
