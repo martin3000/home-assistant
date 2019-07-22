@@ -394,6 +394,14 @@ class ZHADevice:
             SERVER_COMMANDS: cluster.server_commands,
         }
 
+    async def read_zigbee_attribute(self, endpoint_id, cluster_id,
+                                     attribute, cluster_type=IN):
+        """Read a value from a zigbee attribute for a cluster in this entity."""
+        cluster = self.async_get_cluster(endpoint_id, cluster_id, cluster_type)
+        if cluster is None:
+            return None
+        return '{"todo":"jms"}'
+    
     async def write_zigbee_attribute(self, endpoint_id, cluster_id,
                                      attribute, value, cluster_type=IN,
                                      manufacturer=None):
