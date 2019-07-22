@@ -483,6 +483,36 @@ def async_load_api(hass):
     hass.helpers.service.async_register_admin_service(
         DOMAIN, SERVICE_REMOVE, remove, schema=SERVICE_SCHEMAS[IEEE_SERVICE])
 
+    async def get_zigbee_cluster_attributes(service):
+        """Get zigbee attribute for cluster on zha entity."""
+        ieee = service.data.get(ATTR_IEEE)
+        endpoint_id = service.data.get(ATTR_ENDPOINT_ID)
+        cluster_id = service.data.get(ATTR_CLUSTER_ID)
+        cluster_type = service.data.get(ATTR_CLUSTER_TYPE)
+        attribute = service.data.get(ATTR_ATTRIBUTE)
+        zha_device = zha_gateway.get_device(ieee)
+        response = None
+        if zha_device is not None:
+            response = await zha_device.read_zigbee_attribute(
+                endpoint_id,
+                cluster_id,
+                attribute,
+                cluster_type=cluster_type
+            )
+        _LOGGER.debug("Set attribute for: %s %s %s %s %s %s %s",
+                      "{}: [{}]".format(ATTR_CLUSTER_ID, cluster_id),
+                      "{}: [{}]".format(ATTR_CLUSTER_TYPE, cluster_type),
+                      "{}: [{}]".format(ATTR_ENDPOINT_ID, endpoint_id),
+                      "{}: [{}]".format(ATTR_ATTRIBUTE, attribute),
+                      )
+
+    hass.helpers.service.async_register_admin_service(
+        DOMAIN, SERVICE_GET_ZIGBEE_CLUSTER_ATTRIBUTE,
+        get_zigbee_cluster_attributes,
+        schema=SERVICE_SCHEMAS[
+            SERVICE_GET_ZIGBEE_CLUSTER_ATTRIBUTE
+        ])
+
     async def set_zigbee_cluster_attributes(service):
         """Set zigbee attribute for cluster on zha entity."""
         ieee = service.data.get(ATTR_IEEE)
