@@ -38,6 +38,7 @@ UNBIND_REQUEST = 0x0022
 SERVICE_PERMIT = 'permit'
 SERVICE_REMOVE = 'remove'
 SERVICE_SET_ZIGBEE_CLUSTER_ATTRIBUTE = 'set_zigbee_cluster_attribute'
+SERVICE_GET_ZIGBEE_CLUSTER_ATTRIBUTE = 'get_zigbee_cluster_attribute'
 SERVICE_ISSUE_ZIGBEE_CLUSTER_COMMAND = 'issue_zigbee_cluster_command'
 SERVICE_DIRECT_ZIGBEE_BIND = 'issue_direct_zigbee_bind'
 SERVICE_DIRECT_ZIGBEE_UNBIND = 'issue_direct_zigbee_unbind'
@@ -52,6 +53,13 @@ SERVICE_SCHEMAS = {
     }),
     IEEE_SERVICE: vol.Schema({
         vol.Required(ATTR_IEEE_ADDRESS): convert_ieee,
+    }),
+    SERVICE_GET_ZIGBEE_CLUSTER_ATTRIBUTE: vol.Schema({
+        vol.Required(ATTR_IEEE): convert_ieee,
+        vol.Required(ATTR_ENDPOINT_ID): cv.positive_int,
+        vol.Required(ATTR_CLUSTER_ID): cv.positive_int,
+        vol.Optional(ATTR_CLUSTER_TYPE, default=IN): cv.string,
+        vol.Required(ATTR_ATTRIBUTE): cv.positive_int,
     }),
     SERVICE_SET_ZIGBEE_CLUSTER_ATTRIBUTE: vol.Schema({
         vol.Required(ATTR_IEEE): convert_ieee,
