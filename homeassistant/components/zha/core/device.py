@@ -3,6 +3,9 @@ Device for Zigbee Home Automation.
 
 For more details about this component, please refer to the documentation at
 https://home-assistant.io/components/zha/
+
+22.7.2019 jms: read_zigbee_attribute
+
 """
 import asyncio
 from enum import Enum
@@ -376,6 +379,16 @@ class ZHADevice:
             SERVER_COMMANDS: cluster.server_commands,
         }
 
+    # jms
+    async def read_zigbee_attribute(self, endpoint_id, cluster_id,
+                                     attribute, cluster_type=IN):
+        """Read a value from a zigbee attribute for a cluster in this entity."""
+        cluster = self.async_get_cluster(endpoint_id, cluster_id, cluster_type)
+        if cluster is None:
+            return None
+        #return '{"todo":"jms"}'
+        return cluster.attributes
+    
     async def write_zigbee_attribute(self, endpoint_id, cluster_id,
                                      attribute, value, cluster_type=IN,
                                      manufacturer=None):
@@ -419,7 +432,7 @@ class ZHADevice:
             return None
         response = None
         if command_type == SERVER:
-            response = await cluster.command(command, *args,
+            response = await cluster.command(command, *args.split(),  #jms
                                              manufacturer=manufacturer,
                                              expect_reply=True)
         else:
