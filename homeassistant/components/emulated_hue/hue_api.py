@@ -1,4 +1,5 @@
 """Support for a Hue API to control Home Assistant."""
+#jms entity_to_json
 import logging
 
 from aiohttp import web
@@ -517,7 +518,9 @@ def get_entity_state(config, entity):
 
 def entity_to_json(config, entity, state):
     """Convert an entity to its Hue bridge JSON representation."""
-    return {
+    entity_features = entity.attributes.get(ATTR_SUPPORTED_FEATURES, 0)
+    if (entity_features & SUPPORT_BRIGHTNESS): # or entity.domain != light.DOMAIN: #jms
+      return {
         'state':
         {
             HUE_API_STATE_ON: state[STATE_ON],
@@ -531,7 +534,25 @@ def entity_to_json(config, entity, state):
         'modelid': 'HASS123',
         'uniqueid': entity.entity_id,
         'swversion': '123'
-    }
+      }
+    elif entity.domain == light.DOMAIN:
+      return {
+        "state": {HUE_API_STATE_ON: state[STATE_ON], "reachable": True},
+        "type": "On/off light",
+        "name": config.get_entity_name(entity),
+        "modelid": "HASS321",
+        "uniqueid": entity.entity_id,
+        "swversion": "123",
+      }
+    else:
+      return {
+        "state": {HUE_API_STATE_ON: state[STATE_ON], "reachable": True},
+        "type": "On/Off plug-in unit",
+        "name": config.get_entity_name(entity),
+        "modelid": "HASS4321",
+        "uniqueid": entity.entity_id,
+        "swversion": "123",
+      }
 
 
 def create_hue_success_response(entity_id, attr, value):
