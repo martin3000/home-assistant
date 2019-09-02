@@ -30,6 +30,7 @@ STATE_ATTR_NEXT_MIDNIGHT = 'next_midnight'
 STATE_ATTR_NEXT_NOON = 'next_noon'
 STATE_ATTR_NEXT_RISING = 'next_rising'
 STATE_ATTR_NEXT_SETTING = 'next_setting'
+STATE_ATTR_BRIGHTNESS = 'brightness'
 
 # The algorithm used here is somewhat complicated. It aims to cut down
 # the number of sensor updates over the day. It's documented best in
@@ -90,6 +91,7 @@ class Sun(Entity):
         self.solar_elevation = self.solar_azimuth = None
         self.rising = self.phase = None
         self._next_change = None
+        self.brightness = None
 
         def update_location(event):
             self.location = get_astral_location(self.hass)
@@ -125,6 +127,7 @@ class Sun(Entity):
             STATE_ATTR_ELEVATION: self.solar_elevation,
             STATE_ATTR_AZIMUTH: self.solar_azimuth,
             STATE_ATTR_RISING: self.rising,
+            STATE_ATTR_BRIGHTNESS: self.brightness,
         }
 
     def _check_event(self, utc_point_in_time, event, before):
@@ -213,6 +216,24 @@ class Sun(Entity):
             self.location.solar_azimuth(utc_point_in_time), 2)
         self.solar_elevation = round(
             self.location.solar_elevation(utc_point_in_time), 2)
+
+        # jms: calculate brightness
+        # cubic spline to azimuth:
+        if self.solar_elevation >= 20:
+            xl = (3.74, 3.97, -4.07, 1.47)
+        elif self.solar_elevation >= 5:
+            xl = (3.05, 13.28, -45.98, 64.33)
+        elif self.solar_elevation >= -0.8:
+            xl = (2.88, 22.26, -207.64, 1034.30)
+        elif self.solar_elevation >= -5:
+            xl = (2.88, 21.81, -258.11, -858.36)
+        elif self.solar_elevation >= -12:
+            xl = (2.70, 12.17, -431.69, -1899.83)
+        else:
+            xl=(0,0,0,0)
+        x = self.solar_elevation / 90
+        il = xl[0] + xl[1] * x + xl[2] * x * x + xl[3] * x * x * x  # 0.0 to 5.11
+        self.brightness = max(0, round(il/5.11*100.0))  # adjust for percent
 
         _LOGGER.debug(
             "sun position_update@%s: elevation=%s azimuth=%s",
